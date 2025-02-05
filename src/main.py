@@ -1,5 +1,4 @@
 """A CLI application for browser automation using https://github.com/browser-use/browser-use"""
-
 import argparse
 import asyncio
 import logging
@@ -11,11 +10,11 @@ from dotenv import load_dotenv
 from rich.console import Console
 from rich.logging import RichHandler
 from rich.markdown import Markdown
-from langchain_openai import ChatOpenAI
+
+from agent import BrowserAgent
 
 logger = logging.getLogger(__name__)
 console = Console()
-
 
 def parse_arguments():
     """
@@ -89,42 +88,6 @@ def configure_logging(verbose):
         third_party.setLevel(logging.ERROR)
         third_party.propagate = False
 
-
-async def run_agent(input_text):
-    """
-    Runs the agent with the provided arguments.
-    Args:
-        arguments (str): The task arguments for the agent.
-    Returns:
-        result: The result of the agent's execution.
-    """
-    arguments = parse_arguments()
-    agent_args = {
-        "task": input_text,
-        "llm": ChatOpenAI(model="gpt-4o"),
-        "generate_gif": False,
-    }
-    if arguments.max_actions is not None:
-        agent_args["max_actions_per_step"] = arguments.max_actions
-
-    # disabling pylint here because browser_use does too much with the logging config
-    # if we import it before our own logging configuration
-    # pylint: disable-next=import-outside-toplevel
-    from browser_use import Agent
-
-    agent = Agent(**agent_args)
-    status = console.status("[bold green]Automating your browser to answer your query...", spinner="earth")
-
-    status.start()
-    result = await agent.run()
-    status.stop()
-
-    for error in result.errors():
-        logger.error(error)
-
-    return result
-
-
 async def main():
     """
     Main function that processes arguments and runs the agent.
@@ -134,7 +97,9 @@ async def main():
     configure_logging(args.verbose)
 
     input_text = get_input()
-    result = await run_agent(input_text)
+
+    browser_agent = BrowserAgent(console, args.max_actions)
+    result = await browser_agent.run(input_text)
     console.print(Markdown(result.final_result()))
 
 
