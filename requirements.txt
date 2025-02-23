@@ -1,4 +1,4 @@
-browser_use==0.1.37
+browser_use==0.1.40
 langchain_openai==0.3.1
 python-dotenv==1.0.1
 rich==13.9.4
