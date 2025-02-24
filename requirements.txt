@@ -1,5 +1,5 @@
 browser_use==0.1.37
-langchain_openai==0.3.1
+langchain_openai==0.3.7
 python-dotenv==1.0.1
 rich==13.9.4
 setuptools==75.8.0
